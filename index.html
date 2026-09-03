@@ -18,7 +18,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#121212">
 
-  <!-- PWA 與 Web App 跨平台標準宣告 (利於 Chrome / Safari 跳出安裝提示) -->
+  <!-- PWA 與 Web App 跨平台標準宣告 -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1217,7 +1217,6 @@
     });
   }
 
-  // 安全修復：使用 Blob 替代 Data URI，避免手機版觸發閃退
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -1274,7 +1273,6 @@
     reader.readAsText(file);
   }
 
-  // 安全修復：優化 HTML 檔導出釋放記憶體機制，解決下載崩潰
   function downloadUpdatedHTML() {
     saveDataLocal();
     const now = new Date();
