@@ -4,24 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>商品呼出碼管理系統 v4.3.2 RWD</title>
-  <link rel="manifest" href="manifest.json">
-
-  <!-- SVG App Icon & Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='100%' height='100%'><defs><linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231E1E1E'/><stop offset='100%' stop-color='%23121212'/></linearGradient><linearGradient id='primaryGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2366B2FF'/><stop offset='100%' stop-color='%230066CC'/></linearGradient></defs><rect x='0' y='0' width='512' height='512' fill='url(%23bgGrad)'/><g fill='%23FFFFFF' opacity='0.9'><rect x='140' y='160' width='16' height='150' rx='8'/><rect x='176' y='160' width='32' height='150' rx='10'/><rect x='228' y='160' width='16' height='150' rx='8'/><rect x='264' y='160' width='24' height='150' rx='8'/><rect x='308' y='160' width='16' height='150' rx='8'/><rect x='344' y='160' width='28' height='150' rx='10'/></g><circle cx='256' cy='235' r='135' fill='none' stroke='url(%23primaryGrad)' stroke-width='28'/><path d='M 350 330 L 420 400' stroke='url(%23primaryGrad)' stroke-width='36' stroke-linecap='round'/><circle cx='200' cy='340' r='10' fill='%234DA6FF'/><circle cx='256' cy='340' r='10' fill='%234DA6FF'/><circle cx='312' cy='340' r='10' fill='%234DA6FF'/></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='100%' height='100%'><defs><linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231E1E1E'/><stop offset='100%' stop-color='%23121212'/></linearGradient><linearGradient id='primaryGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2366B2FF'/><stop offset='100%' stop-color='%230066CC'/></linearGradient></defs><rect x='0' y='0' width='512' height='512' fill='url(%23bgGrad)'/><g fill='%23FFFFFF' opacity='0.9'><rect x='140' y='160' width='16' height='150' rx='8'/><rect x='176' y='160' width='32' height='150' rx='10'/><rect x='228' y='160' width='16' height='150' rx='8'/><rect x='264' y='160' width='24' height='150' rx='8'/><rect x='308' y='160' width='16' height='150' rx='8'/><rect x='344' y='160' width='28' height='150' rx='10'/></g><circle cx='256' cy='235' r='135' fill='none' stroke='url(%23primaryGrad)' stroke-width='28'/><path d='M 350 330 L 420 400' stroke='url(%23primaryGrad)' stroke-width='36' stroke-linecap='round'/><circle cx='200' cy='340' r='10' fill='%234DA6FF'/><circle cx='256' cy='340' r='10' fill='%234DA6FF'/><circle cx='312' cy='340' r='10' fill='%234DA6FF'/></svg>">
   
-  <!-- Apple iOS 專屬 PWA 與狀態列設定 -->
+  <!-- 防白屏閃爍：最優先載入基礎背景色與主題色 -->
+  <style>
+    html, body {
+      background-color: #121212 !important;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+
+  <!-- PWA 與 Web App 跨平台標準宣告 (利於 Chrome / Safari 跳出安裝提示) -->
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="呼出碼管理">
   <meta name="format-detection" content="telephone=no">
-  <meta name="theme-color" content="#121212">
 
-  <!-- Tesseract.js 圖片 OCR 辨識 -->
+  <!-- SVG App Icon & Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='100%' height='100%'><defs><linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231E1E1E'/><stop offset='100%' stop-color='%23121212'/></linearGradient><linearGradient id='primaryGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2366B2FF'/><stop offset='100%' stop-color='%230066CC'/></linearGradient></defs><rect x='0' y='0' width='512' height='512' fill='url(%23bgGrad)'/><g fill='%23FFFFFF' opacity='0.9'><rect x='140' y='160' width='16' height='150' rx='8'/><rect x='176' y='160' width='32' height='150' rx='10'/><rect x='228' y='160' width='16' height='150' rx='8'/><rect x='264' y='160' width='24' height='150' rx='8'/><rect x='308' y='160' width='16' height='150' rx='8'/><rect x='344' y='160' width='28' height='150' rx='10'/></g><circle cx='256' cy='235' r='135' fill='none' stroke='url(%23primaryGrad)' stroke-width='28'/><path d='M 350 330 L 420 400' stroke='url(%23primaryGrad)' stroke-width='36' stroke-linecap='round'/><circle cx='200' cy='340' r='10' fill='%234DA6FF'/><circle cx='256' cy='340' r='10' fill='%234DA6FF'/><circle cx='312' cy='340' r='10' fill='%234DA6FF'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='100%' height='100%'><defs><linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231E1E1E'/><stop offset='100%' stop-color='%23121212'/></linearGradient><linearGradient id='primaryGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2366B2FF'/><stop offset='100%' stop-color='%230066CC'/></linearGradient></defs><rect x='0' y='0' width='512' height='512' fill='url(%23bgGrad)'/><g fill='%23FFFFFF' opacity='0.9'><rect x='140' y='160' width='16' height='150' rx='8'/><rect x='176' y='160' width='32' height='150' rx='10'/><rect x='228' y='160' width='16' height='150' rx='8'/><rect x='264' y='160' width='24' height='150' rx='8'/><rect x='308' y='160' width='16' height='150' rx='8'/><rect x='344' y='160' width='28' height='150' rx='10'/></g><circle cx='256' cy='235' r='135' fill='none' stroke='url(%23primaryGrad)' stroke-width='28'/><path d='M 350 330 L 420 400' stroke='url(%23primaryGrad)' stroke-width='36' stroke-linecap='round'/><circle cx='200' cy='340' r='10' fill='%234DA6FF'/><circle cx='256' cy='340' r='10' fill='%234DA6FF'/><circle cx='312' cy='340' r='10' fill='%234DA6FF'/></svg>">
+
+  <!-- External JS Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.min.js"></script>
-  <!-- JsBarcode 動態條碼產生 -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.12.3/dist/JsBarcode.all.min.js"></script>
-  <!-- QRCode.js 動態二維碼產生 -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   
   <style>
@@ -92,22 +102,15 @@
       transition: max-width 0.3s ease;
     }
     
-    /* 檢視模式控制樣式 */
-    body.mode-pc .container {
-      max-width: 1024px !important;
-    }
-    body.mode-mobile .container {
-      max-width: 480px !important;
-    }
+    body.mode-pc .container { max-width: 1024px !important; }
+    body.mode-mobile .container { max-width: 480px !important; }
     
-    /* 閱讀模式樣式 (僅隱藏圖片辨識區塊、備份管理區塊與分類標題，完整保留頂部標題列與主題切換鈕) */
     body.mode-reader .sub-card-ocr,
     body.mode-reader .sub-card-backup,
     body.mode-reader .section-title {
       display: none !important;
     }
 
-    /* 頂部資訊列 */
     .header-bar {
       background: linear-gradient(135deg, var(--header-grad-1), var(--header-grad-2));
       border: 1px solid var(--border-color);
@@ -165,7 +168,6 @@
       display: block;
     }
 
-    /* 切換按鈕區塊 */
     .theme-switcher {
       display: flex;
       gap: 4px;
@@ -204,7 +206,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
-    /* 卡片與容器 */
     .card {
       background: var(--card-bg);
       border-radius: 12px;
@@ -229,7 +230,6 @@
     }
     .sub-card:last-child { margin-bottom: 0; }
 
-    /* 搜尋框 */
     .search-wrapper {
       position: relative;
       margin-bottom: 8px;
@@ -274,7 +274,6 @@
       font-size: 11px !important;
     }
 
-    /* 展開 / 收合按鈕 */
     .toggle-btn {
       width: 100%;
       padding: 9px;
@@ -288,7 +287,6 @@
       font-size: 0.85rem !important;
     }
 
-    /* 商品列表與排版 */
     .product-list {
       display: none;
       background: var(--card-bg);
@@ -344,7 +342,6 @@
       flex-shrink: 0;
     }
     
-    /* 呼出碼樣式 */
     .product-code {
       color: var(--primary);
       font-weight: bold;
@@ -476,7 +473,6 @@
       font-weight: bold;
     }
 
-    /* Modal 彈窗樣式 */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -590,6 +586,7 @@
       <button id="btnHeaderExport" class="header-icon-btn" onclick="exportJSON()" title="匯出 JSON"></button>
       <button class="header-icon-btn" onclick="downloadUpdatedHTML()" title="下載最新系統 HTML 檔">💾</button>
       <button class="header-icon-btn" onclick="openCoffeeModal()" title="咖啡機啟動 QR Code">☕</button>
+      <button id="btnPwaInstall" class="header-icon-btn" onclick="triggerPwaInstall()" title="安裝 App" style="display:none;">📲</button>
     </div>
   </div>
 
@@ -643,7 +640,7 @@
       <button class="btn btn-blue" onclick="saveManualProducts()">💾 儲存所有輸入商品</button>
     </div>
 
-    <!-- 子卡片 2：📷 拍照上傳辨識 (iOS 優化版) -->
+    <!-- 子卡片 2：📷 圖片與相機辨識 -->
     <div class="sub-card sub-card-ocr">
       <div style="font-size:0.88rem; font-weight:bold; color:var(--text); margin-bottom:8px;">📷 圖片與相機辨識 <span style="background:#b91c1c; color:#fff; font-size:0.6rem; padding:1px 5px; border-radius:4px; font-weight:normal;">Beta測試中</span></div>
       <div class="tip-box">
@@ -701,30 +698,28 @@
   </footer>
 </div>
 
-<!-- 通用 Alert 訊息 Modal -->
+<!-- Alert Modal -->
 <div id="alertModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
       <span id="alertModalTitle">提示</span>
       <span style="cursor:pointer;" onclick="closeModal('alertModal')">✕</span>
     </div>
-    <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; padding: 8px 0;" id="alertModalMessage">
-    </div>
+    <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; padding: 8px 0;" id="alertModalMessage"></div>
     <div class="modal-footer" style="justify-content: flex-end;">
       <button class="btn btn-blue" onclick="closeModal('alertModal')" style="width: auto; padding: 8px 20px;">確定</button>
     </div>
   </div>
 </div>
 
-<!-- 通用 Confirm 確認 Modal -->
+<!-- Confirm Modal -->
 <div id="confirmModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
       <span id="confirmModalTitle">確認操作</span>
       <span style="cursor:pointer;" onclick="closeModal('confirmModal')">✕</span>
     </div>
-    <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; padding: 8px 0;" id="confirmModalMessage">
-    </div>
+    <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; padding: 8px 0;" id="confirmModalMessage"></div>
     <div class="modal-footer" style="justify-content: flex-end;">
       <button class="btn btn-gray" onclick="closeModal('confirmModal')" style="width: auto; padding: 8px 16px;">取消</button>
       <button class="btn btn-blue" id="confirmModalOkBtn" style="width: auto; padding: 8px 16px;">確定</button>
@@ -732,7 +727,7 @@
   </div>
 </div>
 
-<!-- 關於 Gemini Modal -->
+<!-- About Gemini Modal -->
 <div id="aboutGeminiModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -749,7 +744,7 @@
   </div>
 </div>
 
-<!-- ☕ 咖啡機 QR Code Modal -->
+<!-- Coffee Modal -->
 <div id="coffeeModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -788,7 +783,7 @@
   </div>
 </div>
 
-<!-- 圖示風格選擇 Modal -->
+<!-- Icon Modal -->
 <div id="iconModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -843,7 +838,7 @@
   </div>
 </div>
 
-<!-- 條碼 Modal -->
+<!-- Barcode Modal -->
 <div id="barcodeModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -868,7 +863,7 @@
   </div>
 </div>
 
-<!-- 編輯商品 Modal -->
+<!-- Edit Modal -->
 <div id="editModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -895,7 +890,7 @@
   </div>
 </div>
 
-<!-- 管理分類 Modal -->
+<!-- Category Modal -->
 <div id="categoryModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-header">
@@ -916,12 +911,38 @@
 </div>
 
 <script>
+  let deferredPrompt = null;
+
+  // Service Worker 註冊
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
         .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
         .catch(err => console.log('Service Worker 註冊失敗:', err));
     });
+  }
+
+  // 捕獲瀏覽器 PWA 安裝提示事件
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btnInstall = document.getElementById("btnPwaInstall");
+    if (btnInstall) btnInstall.style.display = "flex";
+  });
+
+  function triggerPwaInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('使用者接受了 PWA 安裝');
+        }
+        deferredPrompt = null;
+        document.getElementById("btnPwaInstall").style.display = "none";
+      });
+    } else {
+      showAlert("如果 Chrome 沒有跳出安裝視窗，請點擊右上角三點選單（⋮）選擇「新增至主畫面」或「安裝應用程式」。");
+    }
   }
 
   window.addEventListener('paste', function(e) {
@@ -1001,7 +1022,6 @@
     if (input) input.click();
   }
 
-  /* 切換版面視圖 (電腦版/手機版/閱讀模式) */
   function setViewMode(mode) {
     document.getElementById('viewPc').classList.remove('active');
     document.getElementById('viewMobile').classList.remove('active');
@@ -1197,19 +1217,24 @@
     });
   }
 
+  // 安全修復：使用 Blob 替代 Data URI，避免手機版觸發閃退
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
     const fileName = `商品呼出碼資料_${timeStr}.json`;
     
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
+    const jsonBlob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(jsonBlob);
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", fileName);
+    downloadAnchor.href = url;
+    downloadAnchor.download = fileName;
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
-    downloadAnchor.remove();
+    setTimeout(() => {
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    }, 100);
   }
 
   function importJSON(event) {
@@ -1249,6 +1274,7 @@
     reader.readAsText(file);
   }
 
+  // 安全修復：優化 HTML 檔導出釋放記憶體機制，解決下載崩潰
   function downloadUpdatedHTML() {
     saveDataLocal();
     const now = new Date();
@@ -1264,8 +1290,10 @@
     a.download = `商品呼出碼管理系統_v4.3.2_rwd_${timeStr}.html`;
     document.body.appendChild(a);
     a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 100);
   }
 
   function saveDataLocal() {
