@@ -567,7 +567,7 @@
     }
   </style>
 
-  <!-- 防閃爍與主題初始化：直接讀取 LocalStorage 套用顏色 -->
+  <!-- 防閃爍與主題初始化 -->
   <script>
     (function() {
       const savedTheme = localStorage.getItem('app_theme_preference') || 'system';
@@ -598,6 +598,7 @@
       <button id="btnHeaderExport" class="header-icon-btn" onclick="exportJSON()" title="匯出 JSON"></button>
       <button class="header-icon-btn" onclick="downloadUpdatedHTML()" title="下載最新系統 HTML 檔">💾</button>
       <button class="header-icon-btn" onclick="openCoffeeModal()" title="咖啡機啟動 QR Code">☕</button>
+      <!-- 📲 PWA 安裝按鈕 -->
       <button id="btnPwaInstall" class="header-icon-btn" onclick="triggerPwaInstall()" title="安裝 App" style="display:none;">📲</button>
     </div>
   </div>
@@ -925,6 +926,14 @@
 <script>
   let deferredPrompt = null;
 
+  // 修復點：正確監聽 PWA beforeinstallprompt 事件並將事件物件鎖定
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btnInstall = document.getElementById("btnPwaInstall");
+    if (btnInstall) btnInstall.style.display = "flex";
+  });
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
@@ -933,19 +942,12 @@
     });
   }
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const btnInstall = document.getElementById("btnPwaInstall");
-    if (btnInstall) btnInstall.style.display = "flex";
-  });
-
   function triggerPwaInstall() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          console.log('使用者接受了 PWA 安裝');
+          console.log('使用者已接受 PWA 安裝');
         }
         deferredPrompt = null;
         document.getElementById("btnPwaInstall").style.display = "none";
@@ -1227,7 +1229,6 @@
     });
   }
 
-  // 💡 修改點 1：匯出時同步打包商品與咖啡機啟動碼
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -1252,7 +1253,6 @@
     }, 100);
   }
 
-  // 💡 修改點 2：匯入時兼顧純陣列（舊格式）與物件打包格式（含咖啡機 QR Code）
   function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1265,7 +1265,6 @@
         let targetCoffeeList = null;
 
         if (Array.isArray(imported)) {
-          // 相容舊版直接導出陣列格式
           targetProducts = imported;
         } else if (typeof imported === 'object' && imported !== null) {
           if (Array.isArray(imported.products)) {
@@ -1320,7 +1319,6 @@
     reader.readAsText(file);
   }
 
-  // 💡 修改點 3：下載網頁檔時先寫入 LocalStorage，確保全域資料最新
   function downloadUpdatedHTML() {
     saveDataLocal();
     const now = new Date();
