@@ -1231,14 +1231,9 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const fileName = `商品呼出碼與咖啡機啟動碼資料_${timeStr}.json`;
+    const fileName = `商品呼出碼資料_${timeStr}.json`;
     
-    const exportData = {
-      products: products,
-      coffeeList: coffeeList
-    };
-
-    const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json;charset=utf-8" });
+    const jsonBlob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(jsonBlob);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.href = url;
@@ -1258,57 +1253,28 @@
     reader.onload = function(e) {
       try {
         const imported = JSON.parse(e.target.result);
-        
-        let targetProducts = [];
-        let targetCoffeeList = null;
-
         if (Array.isArray(imported)) {
-          targetProducts = imported;
-        } else if (typeof imported === 'object' && imported !== null) {
-          if (Array.isArray(imported.products)) {
-            targetProducts = imported.products;
-          }
-          if (Array.isArray(imported.coffeeList)) {
-            targetCoffeeList = imported.coffeeList;
-          }
-        }
+          products = imported.map(item => {
+            const catName = item.tag || item.category || item.cat || "通用";
+            return {
+              name: item.name || "",
+              code: item.code || "",
+              barcode: item.barcode || "",
+              barcode2: item.barcode2 || item.barcode_2 || "",
+              tag: catName
+            };
+          });
 
-        if (targetProducts.length > 0 || targetCoffeeList) {
-          if (targetProducts.length > 0) {
-            products = targetProducts.map(item => {
-              const catName = item.tag || item.category || item.cat || "通用";
-              return {
-                name: item.name || "",
-                code: item.code || "",
-                barcode: item.barcode || "",
-                barcode2: item.barcode2 || item.barcode_2 || "",
-                tag: catName
-              };
-            });
-
-            products.forEach(p => {
-              if (p.tag && !categories.includes(p.tag)) {
-                categories.push(p.tag);
-              }
-            });
-          }
-
-          if (targetCoffeeList) {
-            coffeeList = targetCoffeeList;
-            localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
-          }
+          products.forEach(p => {
+            if (p.tag && !categories.includes(p.tag)) {
+              categories.push(p.tag);
+            }
+          });
 
           saveDataLocal();
           renderCategoryOptions();
           handleSearch();
-          
-          let msg = `成功匯入 ${products.length} 筆商品資料！`;
-          if (targetCoffeeList) {
-            msg += `\n已同步匯入 ${targetCoffeeList.length} 組咖啡機啟動碼！`;
-          }
-          showAlert(msg);
-        } else {
-          showAlert("JSON 內容不符合規範，未發現有效商品或咖啡機資料。");
+          showAlert(`成功匯入 ${products.length} 筆商品資料！`);
         }
       } catch (err) {
         showAlert("JSON 格式不正確，匯入失敗。");
@@ -1341,7 +1307,6 @@
   function saveDataLocal() {
     localStorage.setItem("products_v432", JSON.stringify(products));
     localStorage.setItem("categories_v432", JSON.stringify(categories));
-    localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
   }
 
   function loadDataLocal() {
