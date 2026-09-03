@@ -1227,13 +1227,19 @@
     });
   }
 
+  // 💡 修改點 1：匯出時同步打包商品與咖啡機啟動碼
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const fileName = `商品呼出碼資料_${timeStr}.json`;
+    const fileName = `商品呼出碼與咖啡機啟動碼資料_${timeStr}.json`;
     
-    const jsonBlob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json;charset=utf-8" });
+    const exportData = {
+      products: products,
+      coffeeList: coffeeList
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(jsonBlob);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.href = url;
@@ -1246,6 +1252,7 @@
     }, 100);
   }
 
+  // 💡 修改點 2：匯入時兼顧純陣列（舊格式）與物件打包格式（含咖啡機 QR Code）
   function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1253,28 +1260,58 @@
     reader.onload = function(e) {
       try {
         const imported = JSON.parse(e.target.result);
-        if (Array.isArray(imported)) {
-          products = imported.map(item => {
-            const catName = item.tag || item.category || item.cat || "通用";
-            return {
-              name: item.name || "",
-              code: item.code || "",
-              barcode: item.barcode || "",
-              barcode2: item.barcode2 || item.barcode_2 || "",
-              tag: catName
-            };
-          });
+        
+        let targetProducts = [];
+        let targetCoffeeList = null;
 
-          products.forEach(p => {
-            if (p.tag && !categories.includes(p.tag)) {
-              categories.push(p.tag);
-            }
-          });
+        if (Array.isArray(imported)) {
+          // 相容舊版直接導出陣列格式
+          targetProducts = imported;
+        } else if (typeof imported === 'object' && imported !== null) {
+          if (Array.isArray(imported.products)) {
+            targetProducts = imported.products;
+          }
+          if (Array.isArray(imported.coffeeList)) {
+            targetCoffeeList = imported.coffeeList;
+          }
+        }
+
+        if (targetProducts.length > 0 || targetCoffeeList) {
+          if (targetProducts.length > 0) {
+            products = targetProducts.map(item => {
+              const catName = item.tag || item.category || item.cat || "通用";
+              return {
+                name: item.name || "",
+                code: item.code || "",
+                barcode: item.barcode || "",
+                barcode2: item.barcode2 || item.barcode_2 || "",
+                tag: catName
+              };
+            });
+
+            products.forEach(p => {
+              if (p.tag && !categories.includes(p.tag)) {
+                categories.push(p.tag);
+              }
+            });
+          }
+
+          if (targetCoffeeList) {
+            coffeeList = targetCoffeeList;
+            localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
+          }
 
           saveDataLocal();
           renderCategoryOptions();
           handleSearch();
-          showAlert(`成功匯入 ${products.length} 筆商品資料！`);
+          
+          let msg = `成功匯入 ${products.length} 筆商品資料！`;
+          if (targetCoffeeList) {
+            msg += `\n已同步匯入 ${targetCoffeeList.length} 組咖啡機啟動碼！`;
+          }
+          showAlert(msg);
+        } else {
+          showAlert("JSON 內容不符合規範，未發現有效商品或咖啡機資料。");
         }
       } catch (err) {
         showAlert("JSON 格式不正確，匯入失敗。");
@@ -1283,6 +1320,7 @@
     reader.readAsText(file);
   }
 
+  // 💡 修改點 3：下載網頁檔時先寫入 LocalStorage，確保全域資料最新
   function downloadUpdatedHTML() {
     saveDataLocal();
     const now = new Date();
@@ -1307,6 +1345,7 @@
   function saveDataLocal() {
     localStorage.setItem("products_v432", JSON.stringify(products));
     localStorage.setItem("categories_v432", JSON.stringify(categories));
+    localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
   }
 
   function loadDataLocal() {
