@@ -1227,7 +1227,6 @@
     });
   }
 
-  // 匯出時同步打包商品與咖啡機啟動碼
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -1252,7 +1251,6 @@
     }, 100);
   }
 
-  // 匯入時兼顧純陣列（舊格式）與物件打包格式（含咖啡機 QR Code）
   function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1265,7 +1263,6 @@
         let targetCoffeeList = null;
 
         if (Array.isArray(imported)) {
-          // 相容舊版直接導出陣列格式
           targetProducts = imported;
         } else if (typeof imported === 'object' && imported !== null) {
           if (Array.isArray(imported.products)) {
@@ -1320,7 +1317,6 @@
     reader.readAsText(file);
   }
 
-  // 下載網頁檔時先寫入 LocalStorage，確保全域資料最新
   function downloadUpdatedHTML() {
     saveDataLocal();
     const now = new Date();
