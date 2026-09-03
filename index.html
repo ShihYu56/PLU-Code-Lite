@@ -3,20 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>商品呼出碼管理系統 v4.3.2 RWD</title>
+  <title>商品呼出碼管理系統 v4.3.4 RWD</title>
   
-  <!-- 防白屏閃爍：最優先載入基礎背景色與主題色 -->
-  <style>
-    html, body {
-      background-color: #121212 !important;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#121212">
+  <meta id="themeColorMeta" name="theme-color" content="#121212">
 
   <!-- PWA 與 Web App 跨平台標準宣告 -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -35,7 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   
   <style>
-    :root.dark {
+    :root, html.dark {
       --primary: #4da6ff;
       --bg: #121212;
       --card-bg: #1e1e1e;
@@ -53,17 +42,17 @@
       --tip-text: #fef08a;
       --barcode-has: #10b981;
     }
-    :root.light {
+    html.light {
       --primary: #0066cc;
       --bg: #f4f6f9;
       --card-bg: #ffffff;
       --text: #222222;
       --border-color: #d1d5db;
       --input-bg: #f8fafc;
-      --section-card-bg: #edf2f7;
+      --section-card-bg: #e2e8f0;
       --sub-card-bg: #ffffff;
-      --header-grad-1: #e2e8f0;
-      --header-grad-2: #cbd5e1;
+      --header-grad-1: #ffffff;
+      --header-grad-2: #edf2f7;
       --btn-active-bg: #0066cc;
       --btn-active-text: #ffffff;
       --tip-bg: #fef9c3;
@@ -77,15 +66,21 @@
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    
+    html, body {
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
+      padding: 0;
+      transition: background-color 0.25s, color 0.25s;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
       display: flex;
       justify-content: center;
-      transition: background-color 0.25s, color 0.25s;
+      min-height: 100vh;
     }
 
     input, select, textarea, button {
@@ -176,6 +171,7 @@
       padding: 4px;
       border-radius: 10px;
       border: 1px solid var(--border-color);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
     .theme-btn {
       flex: 1;
@@ -570,6 +566,22 @@
       text-decoration: underline;
     }
   </style>
+
+  <!-- 防閃爍與主題初始化：直接讀取 LocalStorage 套用顏色 -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('app_theme_preference') || 'system';
+      let targetTheme = 'dark';
+      if (savedTheme === 'light') {
+        targetTheme = 'light';
+      } else if (savedTheme === 'system') {
+        targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.className = targetTheme;
+      const themeColor = targetTheme === 'light' ? '#f4f6f9' : '#121212';
+      document.getElementById('themeColorMeta')?.setAttribute('content', themeColor);
+    })();
+  </script>
 </head>
 <body class="mode-mobile">
 
@@ -594,7 +606,7 @@
   <div class="theme-switcher top-theme-switcher">
     <button id="themeDark" class="theme-btn" onclick="setTheme('dark')">🌙 暗黑模式</button>
     <button id="themeLight" class="theme-btn" onclick="setTheme('light')">☀️ 正常模式(白色)</button>
-    <button id="themeSystem" class="theme-btn active" onclick="setTheme('system')">🔄 系統預設</button>
+    <button id="themeSystem" class="theme-btn" onclick="setTheme('system')">🔄 系統預設</button>
   </div>
 
   <!-- 搜尋與類別篩選區塊 -->
@@ -690,7 +702,7 @@
   </div>
 
   <footer>
-    <div>商品呼出碼管理系統 v4.3.2 RWD &copy; 2026</div>
+    <div>商品呼出碼管理系統 v4.3.4 RWD &copy; 2026</div>
     <div style="margin-top: 4px;">
       開發者：<a href="https://github.com/shihyu56" target="_blank" rel="noopener noreferrer">GitHub shihyu56</a> | 
       <a href="javascript:void(0)" onclick="openAboutGeminiModal()">關於 Gemini</a>
@@ -913,7 +925,6 @@
 <script>
   let deferredPrompt = null;
 
-  // Service Worker 註冊
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
@@ -922,7 +933,6 @@
     });
   }
 
-  // 捕獲瀏覽器 PWA 安裝提示事件
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -1217,13 +1227,19 @@
     });
   }
 
+  /* --- 整合方案一：統一匯出/匯入 商品 + 咖啡機資料 --- */
   function exportJSON() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const fileName = `商品呼出碼資料_${timeStr}.json`;
+    const fileName = `系統整合備份資料_${timeStr}.json`;
     
-    const jsonBlob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json;charset=utf-8" });
+    const exportData = {
+      products: products,
+      coffeeList: coffeeList
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(jsonBlob);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.href = url;
@@ -1243,8 +1259,21 @@
     reader.onload = function(e) {
       try {
         const imported = JSON.parse(e.target.result);
+        let rawProducts = [];
+        let rawCoffee = [];
+
+        // 判斷是否為新版整合格式 (物件) 還是舊版格式 (純陣列)
         if (Array.isArray(imported)) {
-          products = imported.map(item => {
+          rawProducts = imported;
+        } else if (typeof imported === 'object' && imported !== null) {
+          if (Array.isArray(imported.products)) rawProducts = imported.products;
+          if (Array.isArray(imported.coffeeList)) rawCoffee = imported.coffeeList;
+        } else {
+          throw new Error("無效的 JSON 格式");
+        }
+
+        if (rawProducts.length > 0) {
+          products = rawProducts.map(item => {
             const catName = item.tag || item.category || item.cat || "通用";
             return {
               name: item.name || "",
@@ -1260,12 +1289,26 @@
               categories.push(p.tag);
             }
           });
-
-          saveDataLocal();
-          renderCategoryOptions();
-          handleSearch();
-          showAlert(`成功匯入 ${products.length} 筆商品資料！`);
         }
+
+        if (rawCoffee.length > 0) {
+          coffeeList = rawCoffee.map(c => ({
+            name: c.name || "未命名機器",
+            code: c.code || ""
+          }));
+        }
+
+        saveDataLocal();
+        renderCategoryOptions();
+        handleSearch();
+        renderCoffeeSelectOptions();
+
+        let alertMsg = `成功匯入！\n• 商品資料：${rawProducts.length} 筆`;
+        if (rawCoffee.length > 0) {
+          alertMsg += `\n• 咖啡機 QR 碼：${rawCoffee.length} 筆`;
+        }
+        showAlert(alertMsg);
+
       } catch (err) {
         showAlert("JSON 格式不正確，匯入失敗。");
       }
@@ -1285,7 +1328,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `商品呼出碼管理系統_v4.3.2_rwd_${timeStr}.html`;
+    a.download = `商品呼出碼管理系統_v4.3.4_rwd_${timeStr}.html`;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
@@ -1297,6 +1340,7 @@
   function saveDataLocal() {
     localStorage.setItem("products_v432", JSON.stringify(products));
     localStorage.setItem("categories_v432", JSON.stringify(categories));
+    localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
   }
 
   function loadDataLocal() {
@@ -1316,15 +1360,35 @@
   }
 
   function setTheme(theme) {
+    localStorage.setItem('app_theme_preference', theme);
     document.querySelectorAll('.top-theme-switcher .theme-btn').forEach(b => b.classList.remove('active'));
+
+    let activeTheme = 'dark';
     if (theme === 'dark') {
-      document.documentElement.className = 'dark';
+      activeTheme = 'dark';
       document.getElementById('themeDark').classList.add('active');
     } else if (theme === 'light') {
-      document.documentElement.className = 'light';
+      activeTheme = 'light';
       document.getElementById('themeLight').classList.add('active');
     } else {
-      document.documentElement.className = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.getElementById('themeSystem').classList.add('active');
+    }
+
+    document.documentElement.className = activeTheme;
+
+    const themeColor = activeTheme === 'light' ? '#f4f6f9' : '#121212';
+    document.getElementById('themeColorMeta')?.setAttribute('content', themeColor);
+  }
+
+  function syncThemeUIState() {
+    const saved = localStorage.getItem('app_theme_preference') || 'system';
+    document.querySelectorAll('.top-theme-switcher .theme-btn').forEach(b => b.classList.remove('active'));
+    if (saved === 'dark') {
+      document.getElementById('themeDark').classList.add('active');
+    } else if (saved === 'light') {
+      document.getElementById('themeLight').classList.add('active');
+    } else {
       document.getElementById('themeSystem').classList.add('active');
     }
   }
@@ -1476,9 +1540,7 @@
       percentEl.innerText = "100%";
       statusEl.innerText = "辨識完成！正在解析商品資料...";
       cancelBtn.style.display = "none";
-      
-      console.log("📝 OCR 原始結果：\n", ret.data.text);
-      
+
       parseOCRResult(ret.data.text);
 
     } catch (err) {
@@ -1643,7 +1705,7 @@
         row.querySelector(".inp-barcode2").value = "";
         row.querySelector(".inp-cat").value = "通用";
       } else {
-        showAlert("抱歉! 無法刪除此列喔!");
+        showAlert("無法刪除最後一列！");
       }
     }
   }
@@ -1779,6 +1841,7 @@
   }
 
   window.onload = function() {
+    syncThemeUIState();
     loadDataLocal();
     loadIconStyleSettings();
     renderCategoryOptions();
