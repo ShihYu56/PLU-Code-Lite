@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>商品呼出碼管理系統 v4.3.3 RWD</title>
+  <title>商品呼出碼管理系統 v4.3.4 RWD</title>
   
   <meta id="themeColorMeta" name="theme-color" content="#121212">
+
+  <!-- PWA Manifest 連結 -->
+  <link rel="manifest" href="manifest.json">
 
   <!-- PWA 與 Web App 跨平台標準宣告 -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -702,7 +705,7 @@
   </div>
 
   <footer>
-    <div>商品呼出碼管理系統 v4.3.3 RWD &copy; 2026</div>
+    <div>商品呼出碼管理系統 v4.3.4 RWD &copy; 2026</div>
     <div style="margin-top: 4px;">
       開發者：<a href="https://github.com/shihyu56" target="_blank" rel="noopener noreferrer">GitHub shihyu56</a> | 
       <a href="javascript:void(0)" onclick="openAboutGeminiModal()">關於 Gemini</a>
@@ -925,11 +928,17 @@
 <script>
   let deferredPrompt = null;
 
+  // 修正後的 Service Worker 註冊邏輯
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
-        .catch(err => console.log('Service Worker 註冊失敗:', err));
+      const isLocalFile = window.location.protocol === 'file:';
+      if (!isLocalFile) {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
+          .catch(err => console.log('Service Worker 註冊失敗:', err));
+      } else {
+        console.warn('目前為本地 file:// 環境，已暫停 Service Worker 註冊。');
+      }
     });
   }
 
@@ -1231,9 +1240,14 @@
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const fileName = `商品呼出碼資料_${timeStr}.json`;
+    const fileName = `商品呼出碼與咖啡機啟動碼資料_${timeStr}.json`;
     
-    const jsonBlob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json;charset=utf-8" });
+    const exportData = {
+      products: products,
+      coffeeList: coffeeList
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(jsonBlob);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.href = url;
@@ -1253,28 +1267,57 @@
     reader.onload = function(e) {
       try {
         const imported = JSON.parse(e.target.result);
-        if (Array.isArray(imported)) {
-          products = imported.map(item => {
-            const catName = item.tag || item.category || item.cat || "通用";
-            return {
-              name: item.name || "",
-              code: item.code || "",
-              barcode: item.barcode || "",
-              barcode2: item.barcode2 || item.barcode_2 || "",
-              tag: catName
-            };
-          });
+        
+        let targetProducts = [];
+        let targetCoffeeList = null;
 
-          products.forEach(p => {
-            if (p.tag && !categories.includes(p.tag)) {
-              categories.push(p.tag);
-            }
-          });
+        if (Array.isArray(imported)) {
+          targetProducts = imported;
+        } else if (typeof imported === 'object' && imported !== null) {
+          if (Array.isArray(imported.products)) {
+            targetProducts = imported.products;
+          }
+          if (Array.isArray(imported.coffeeList)) {
+            targetCoffeeList = imported.coffeeList;
+          }
+        }
+
+        if (targetProducts.length > 0 || targetCoffeeList) {
+          if (targetProducts.length > 0) {
+            products = targetProducts.map(item => {
+              const catName = item.tag || item.category || item.cat || "通用";
+              return {
+                name: item.name || "",
+                code: item.code || "",
+                barcode: item.barcode || "",
+                barcode2: item.barcode2 || item.barcode_2 || "",
+                tag: catName
+              };
+            });
+
+            products.forEach(p => {
+              if (p.tag && !categories.includes(p.tag)) {
+                categories.push(p.tag);
+              }
+            });
+          }
+
+          if (targetCoffeeList) {
+            coffeeList = targetCoffeeList;
+            localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
+          }
 
           saveDataLocal();
           renderCategoryOptions();
           handleSearch();
-          showAlert(`成功匯入 ${products.length} 筆商品資料！`);
+          
+          let msg = `成功匯入 ${products.length} 筆商品資料！`;
+          if (targetCoffeeList) {
+            msg += `\n已同步匯入 ${targetCoffeeList.length} 組咖啡機啟動碼！`;
+          }
+          showAlert(msg);
+        } else {
+          showAlert("JSON 內容不符合規範，未發現有效商品或咖啡機資料。");
         }
       } catch (err) {
         showAlert("JSON 格式不正確，匯入失敗。");
@@ -1307,6 +1350,7 @@
   function saveDataLocal() {
     localStorage.setItem("products_v432", JSON.stringify(products));
     localStorage.setItem("categories_v432", JSON.stringify(categories));
+    localStorage.setItem("coffeeList_v432", JSON.stringify(coffeeList));
   }
 
   function loadDataLocal() {
